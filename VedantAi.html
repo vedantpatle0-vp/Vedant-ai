@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Vedant AI</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <style>
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background: #0f172a;
+      color: #fff;
+      display: flex;
+      flex-direction: column;
+      height: 100vh;
+    }
+
+    header {
+      text-align: center;
+      padding: 12px;
+      background: #020617;
+      border-bottom: 1px solid #1e293b;
+    }
+
+    header h2 {
+      margin: 0;
+      color: #38bdf8;
+    }
+
+    header p {
+      margin: 4px 0 0;
+      font-size: 13px;
+      color: #94a3b8;
+    }
+
+    #chat {
+      flex: 1;
+      overflow-y: auto;
+      padding: 10px;
+    }
+
+    .user {
+      background: #1e293b;
+      margin: 6px;
+      padding: 8px;
+      border-radius: 8px;
+      text-align: right;
+    }
+
+    .bot {
+      background: #020617;
+      margin: 6px;
+      padding: 8px;
+      border-radius: 8px;
+      text-align: left;
+      border: 1px solid #1e293b;
+    }
+
+    #inputArea {
+      display: flex;
+      padding: 10px;
+      background: #020617;
+      border-top: 1px solid #1e293b;
+    }
+
+    #msg {
+      flex: 1;
+      padding: 10px;
+      border-radius: 6px;
+      border: none;
+      font-size: 16px;
+      outline: none;
+    }
+
+    button {
+      margin-left: 8px;
+      padding: 10px 16px;
+      border-radius: 6px;
+      border: none;
+      font-size: 16px;
+      background: #38bdf8;
+      color: #000;
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <h2>🤖 Vedant AI</h2>
+    <p>India ka apna AI Assistant 🇮🇳</p>
+  </header>
+
+  <div id="chat"></div>
+
+  <div id="inputArea">
+    <input id="msg" placeholder="Yahan apna sawal likho..." />
+    <button onclick="send()">Send</button>
+  </div>
+
+<script>
+const API_KEY = "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"; // 👈 Yahan apni OpenRouter API key paste karo
+
+async function send() {
+  let input = document.getElementById("msg");
+  let msg = input.value.trim();
+  if (!msg) return;
+
+  let chat = document.getElementById("chat");
+
+  chat.innerHTML += `<div class="user">🧑 You: ${msg}</div>`;
+  input.value = "";
+
+  chat.innerHTML += `<div class="bot" id="loading">🤖 Vedant AI: Soch raha hoon...</div>`;
+  chat.scrollTop = chat.scrollHeight;
+
+  try {
+    let res = await fetch("https://openrouter.ai/api/v1/chat/completions", {
+      method: "POST",
+      headers: {
+        "Authorization": "Bearer " + API_KEY,
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        model: "mistralai/mistral-7b-instruct",
+        messages: [
+          { role: "system", content: "You are a helpful AI assistant who always replies in simple Hindi or Hinglish." },
+          { role: "user", content: msg }
+        ]
+      })
+    });
+
+    let data = await res.json();
+    document.getElementById("loading").remove();
+
+    let reply = data.choices[0].message.content;
+    chat.innerHTML += `<div class="bot">🤖 Vedant AI: ${reply}</div>`;
+    chat.scrollTop = chat.scrollHeight;
+
+  } catch (e) {
+    document.getElementById("loading").remove();
+    chat.innerHTML += `<div class="bot">❌ Error: API ka response nahi aaya.</div>`;
+  }
+}
+</script>
+
+</body>
+</html>
